@@ -1,4 +1,7 @@
+*jvsc*
 *.pyc
+*.out
+*.pkl
 *.dat
 *.cat
 *.fits
