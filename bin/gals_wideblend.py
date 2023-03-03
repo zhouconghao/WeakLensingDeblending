@@ -7,6 +7,7 @@ import scipy.optimize
 
 import galsim
 import fitsio
+import pandas as pd
 
 LOGGER = logging.getLogger(__name__)
 WLDeblendData = collections.namedtuple(
@@ -36,7 +37,7 @@ WLDeblendGal = collections.namedtuple(
 def _cached_catalog_read():
     fname = os.path.join(
         '/data/groups/jeltema/zhou/lsst_shear/WeakLensingDeblending/data',
-        'dc2_subsampled.fits')
+        'table_for_wld.fits')
     return fitsio.read(fname)
 
 
@@ -176,7 +177,7 @@ def get_gal_wldeblend(*, rng, ind, data):
     # rind = np.arange(data.cat.size)
 
     rind = ind
-    angle = rng.uniform() * 360
+    angle = rng.uniform() * 360  # rotation angle
     pa_angle = rng.uniform() * 360
 
     data.cat['pa_disk'][rind] = pa_angle

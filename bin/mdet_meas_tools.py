@@ -21,6 +21,10 @@ import tqdm
 import schwimmbad
 import yaml
 
+import pickle
+import galsim
+import os
+
 MDET_CONFIG = yaml.safe_load("""\
 metacal:
   psf: fitgauss
@@ -572,7 +576,8 @@ def _run_sim_pair(args):
     return np.array(datap, dtype=dtype), np.array(datam, dtype=dtype)
 
 
-def run_mdet_sims(gal,
+def run_mdet_sims(halo_df,
+                  gal_path,
                   sim_func,
                   sim_kwargs,
                   seed,
@@ -634,20 +639,32 @@ def run_mdet_sims(gal,
         rank = 0
 
     if rank == 0:
+
+        ngals = len(halo_df)
+        if ngals < n_sims:
+            halo_df = halo_df.sample(n=n_sims, replace=True)
+        if ngals > n_sims:
+            n_sims = ngals
+
         rng = np.random.RandomState(seed=seed)
         sim_rng_seeds = rng.randint(low=1, high=2**29, size=n_sims)
 
+        gal_ids = halo_df.index.values
+        gal_path_list = [
+            os.path.join(gal_path, f"gals_{gal_id}.pkl") for gal_id in gal_ids
+        ]
+        gal_unrotated = [
+            pickle.load(open(gal_path, "rb")) for gal_path in gal_path_list
+        ]
+        gal_list = [
+            gal[0][0].rotate(theta=rng.uniform() * np.pi * galsim.radians)
+            for gal in gal_unrotated
+        ]
+
         args = []
         for i, rng_seed in enumerate(sim_rng_seeds):
-            args.append((
-                i,
-                backend,
-                sim_func,
-                sim_kwargs,
-                start,
-                rng_seed,
-                gal,
-            ))
+            args.append((i, backend, sim_func, sim_kwargs, start, rng_seed,
+                         gal_list[i]))
     else:
         args = []
 
