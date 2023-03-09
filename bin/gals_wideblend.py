@@ -34,15 +34,13 @@ WLDeblendGal = collections.namedtuple(
 
 
 @functools.lru_cache(maxsize=8)
-def _cached_catalog_read():
-    fname = os.path.join(
-        '/data/groups/jeltema/zhou/lsst_shear/WeakLensingDeblending/data',
-        'table_for_wld.fits')
+def _cached_catalog_read(catalog_path):
+    fname = os.path.join(catalog_path)
     return fitsio.read(fname)
 
 
 @functools.lru_cache(maxsize=8)
-def init_wldeblend(*, survey_bands):
+def init_wldeblend(*, survey_bands, catalog_path):
     """Initialize weak lensing deblending survey data.
     Parameters
     ----------
@@ -78,7 +76,7 @@ def init_wldeblend(*, survey_bands):
     else:
         exptime = None
 
-    wldeblend_cat = _cached_catalog_read()
+    wldeblend_cat = _cached_catalog_read(catalog_path)
 
     surveys = []
     builders = []
